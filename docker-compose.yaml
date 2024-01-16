@@ -1,0 +1,24 @@
+# https://github.com/SeleniumHQ/docker-selenium
+
+version: "3"
+
+services:
+  firefox:
+    image: selenium/standalone-firefox:4.16.1-20231219
+    shm_size: 2gb
+    ports:
+      - "4444:4444" # selenium port
+      - "7900:7900" # noVNC port
+
+  bot:
+    build:
+      context: .
+    environment:
+      - FILES_DIR=/files
+      - TARGET_URL=https://example.com
+      - SELENIUM_STANDALONE_URL=http://firefox:4444
+    depends_on:
+      firefox:
+        condition: service_started
+    volumes:
+      - ./files:/files
