@@ -1,11 +1,16 @@
-FROM python:3.9-alpine
+FROM ghcr.io/puppeteer/puppeteer:16.1.0 AS base
 
-RUN mkdir /bot
+FROM base as builder
 WORKDIR /bot
 
-COPY requirements.txt ./requirements.txt
-RUN pip install -r requirements.txt
+COPY package.json package-lock.json tsconfig.json ./
+RUN npm ci --ignore-scripts
 
-COPY ./src ./src
+COPY src ./src
+RUN npm run build
 
-CMD ["python", "-u", "-m", "src.bot"]
+FROM base as release
+
+COPY --from=builder /bot/build ./build
+
+CMD ["node", "build/main.js"]
