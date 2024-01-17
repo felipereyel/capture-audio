@@ -3,16 +3,20 @@
   "version": "1.0.0",
   "description": "## How to run",
   "scripts": {
-    "build": "esbuild ./src/main.ts --platform=node --target=node18 --bundle --outfile=build/main.js"
+    "build": "esbuild ./src/main.ts --platform=node --target=node18 --bundle --outfile=build/main.js",
+    "dev": "NODE_ENV=development ts-node -r dotenv/config ./src/main.ts"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "dotenv": "^16.3.1",
     "esbuild": "^0.19.11",
-    "eslint": "^8.56.0"
+    "eslint": "^8.56.0",
+    "ts-node": "^10.9.2"
   },
   "dependencies": {
     "puppeteer": "^21.7.0",
+    "testcontainers": "^10.6.0",
     "typescript": "^5.3.3"
   }
 }

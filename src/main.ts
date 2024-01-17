@@ -1,36 +1,31 @@
+import fs from 'fs';
 import puppeteer from 'puppeteer';
+import { GenericContainer } from 'testcontainers';
 
-const filesFolder = process.env.FILES_FOLDER || 'files';
+const { FILES_FOLDER, CHROME_IMAGE } = process.env;
+if (!FILES_FOLDER || !CHROME_IMAGE) throw new Error('Missing environment variables');
+fs.mkdirSync(FILES_FOLDER, { recursive: true });
 
-(async () => {
-  // Launch the browser and open a new blank page
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
+async function main(filesFolder: string, chromeImage: string) {
+  const container = await new GenericContainer(chromeImage).withExposedPorts(3000).start();
+  try {
+    const host = container.getHost();
+    const port = container.getMappedPort(3000);
+    const browserWSEndpoint = `ws://${host}:${port}`;
+  
+    console.log('Connecting to browser...');
+    const browser = await puppeteer.connect({ browserWSEndpoint });
+  
+    console.log('Opening new page...');
+    const page = await browser.newPage();
+    await page.goto('http://www.example.com/');
+  
+    await page.screenshot({path: `${filesFolder}/screenshot.png`});
+    await browser.close();
 
-  // Navigate the page to a URL
-  await page.goto('https://developer.chrome.com/');
+  } finally {
+    await container.stop();
+  }
+}
 
-  // Set screen size
-  await page.setViewport({width: 1080, height: 1024});
-
-  // Type into search box
-  await page.type('.search-box__input', 'automate beyond recorder');
-
-  // Wait and click on first result
-  const searchResultSelector = '.search-box__link';
-  await page.waitForSelector(searchResultSelector);
-  await page.click(searchResultSelector);
-
-  // Locate the full title with a unique string
-  const textSelector = await page.waitForSelector(
-    'text/Customize and automate'
-  );
-  const fullTitle = await textSelector?.evaluate(el => el.textContent);
-
-  // Print the full title
-  console.log('The title of this blog post is "%s".', fullTitle);
-
-  await page.screenshot({path: `${filesFolder}/screenshot.png`});
-
-  await browser.close();
-})();
+main(FILES_FOLDER, CHROME_IMAGE).catch(console.error);

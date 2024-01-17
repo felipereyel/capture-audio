@@ -1,9 +1,13 @@
 # capture-audio
 
+## Requirements
+- docker to run browser
+- node to run tool
+
 ## How to run
 
 ```sh
-    docker compose up --build
+    npm run dev
 ```
 
 ## Next steps
