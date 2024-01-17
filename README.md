@@ -1,8 +1,7 @@
 # capture-audio
 
 ## Requirements
-- docker to run browser
-- node to run tool
+- node
 
 ## How to run
 
